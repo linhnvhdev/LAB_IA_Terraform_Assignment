@@ -15,3 +15,17 @@ variable "main_subnet_id" {
   description = "ID of created VPC"
   default = "default_main_subnet_id"
 }
+
+variable "vpc_cidr_v4" {
+  description = "Ipv4 CIDR of created VPC"
+  default = "10.0.0.0/16"
+}
+
+variable "vpc_cidr_v6" {
+  description = "Ipv6 CIDR of created VPC"
+}
+
+variable "ec2_password" {
+  description = "Password in ec2 userdata"
+  type = string
+}

@@ -6,3 +6,6 @@ terraform.tfstate.backup
 
 terraform.tf
 providers.tf
+
+*.tfvars
+*.tfvars.json
