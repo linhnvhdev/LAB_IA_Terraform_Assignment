@@ -23,3 +23,8 @@ output "subnet_cidr" {
   description = "CIDR of created subnet"
   value       = length(aws_vpc.main) > 0 ? aws_vpc.main[0].id : null
 }
+
+output "vpc_cidr_v6" {
+  description = "CIDR v6 of created VPC"
+  value = length(aws_vpc.main) > 0 ? aws_vpc.main[0].ipv6_cidr_block : null
+}
