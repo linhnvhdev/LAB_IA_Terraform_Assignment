@@ -25,7 +25,7 @@ resource "aws_subnet" "main" {
   cidr_block = "10.0.3.0/24"
   availability_zone = data.aws_availability_zones.available.names[0]
 
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   ipv6_cidr_block = cidrsubnet(aws_vpc.main[0].ipv6_cidr_block, 8, 1)
   assign_ipv6_address_on_creation = true
