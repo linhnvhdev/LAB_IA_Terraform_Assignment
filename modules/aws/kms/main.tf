@@ -1,6 +1,6 @@
 resource "aws_kms_key" "main" {
   description             = "sadcloud key"
-  enable_key_rotation = false
+  enable_key_rotation = true
   count =  1 
 }
 
