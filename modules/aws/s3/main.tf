@@ -25,8 +25,8 @@ resource "aws_s3_bucket" "main" {
   }
 
   versioning {
-      enabled =  false 
-      mfa_delete = false
+      enabled =  true 
+      mfa_delete = true
   }
 
   dynamic "website" {
@@ -103,8 +103,11 @@ data "aws_iam_policy_document" "getonly" {
 resource "aws_s3_bucket" "getonly" {
   bucket_prefix = "sadcloudhetonlys3"
   force_destroy = true
-
   count = 1
+  versioning {
+    mfa_delete = true
+    enabled = true
+  }
 }
 
 data "aws_iam_policy_document" "public" {
@@ -131,4 +134,17 @@ resource "aws_s3_bucket" "public" {
   bucket_prefix = "sadcloudhetonlys3"
   force_destroy = true
   count = 1
+  versioning {
+    enabled = true
+    mfa_delete = true
+  }
 }
+
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
+  bucket = aws_s3_bucket.main.id
+  block_public_acls = true
+  block_public_policy = true
+  ignore_public_acls = true
+  restrict_public_buckets = true
+}
+
