@@ -13,6 +13,36 @@ resource "aws_vpc" "main" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "example" {
+  name = "/aws/vpc-flow-logs"
+}
+
+resource "aws_iam_role" "example" {
+  name               = "flow-log-role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "vpc-flow-logs.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_flow_log" "example" {
+  name            = "example-flow-log"
+  vpc_id          = aws_vpc.main.id
+  traffic_type    = "ALL"
+  log_destination = aws_cloudwatch_log_group.example.arn
+  iam_role_arn    = aws_iam_role.example.arn
+}
+
 # grab AZs
 data "aws_availability_zones" "available" {
   state = "available"
