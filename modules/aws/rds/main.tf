@@ -15,10 +15,19 @@ resource "aws_db_instance" "main" {
   skip_final_snapshot = true
 
   auto_minor_version_upgrade =  false 
-  storage_encrypted          =  false 
-  backup_retention_period    =  0 
+  storage_encrypted          =  true 
+  backup_retention_period    =  7
   multi_az =  false 
   db_subnet_group_name = aws_db_subnet_group.default[0].name
-  publicly_accessible = true
+  publicly_accessible = false
   count =  1 
+  iam_database_authentication_enabled = true
+  deletion_protection = true
+  performance_insights_enabled = true
+  performance_insights_kms_key_id = aws_kms_key.performance_insights_kms.id
+}
+
+resource "aws_kms_key" "performance_insights_kms" {
+  name = "performance_insights_kms"
+  enable_key_rotation = true
 }
