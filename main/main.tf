@@ -62,3 +62,7 @@ module "ses" {
 module "sns" {
   source = "../modules/aws/sns"
 }
+
+module "secretsmanager" {
+  source = "../modules/aws/secretsmanager"
+}

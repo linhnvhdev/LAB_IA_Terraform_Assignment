@@ -30,7 +30,6 @@ resource "aws_instance" "main" {
   }
 
   associate_public_ip_address = true
-  # user_data                   =  "password,AKIAIOSFODNN7EXAMPLE" 
 
   tags = {
     Name = var.name
@@ -347,7 +346,7 @@ resource "aws_security_group" "whitelists_aws_ip_from_banned_region" {
     from_port   = 0
     to_port     = 0
     protocol    = -1
-    cidr_blocks = ["52.28.0.0/16"] # eu-central-1
+    cidr_blocks = ["52.28.0.0/32"] # eu-central-1
   }
 
   egress {
@@ -379,7 +378,7 @@ resource "aws_security_group" "whitelists_aws" {
     from_port   = 0
     to_port     = 0
     protocol    = -1
-    cidr_blocks = ["52.14.0.0/16"] # us-east-2
+    cidr_blocks = ["52.14.0.0/32"] # us-east-2
   }
 
   egress {
@@ -499,7 +498,7 @@ resource "aws_security_group" "overlapping_security_group" {
     from_port   = 0
     to_port     = 0
     protocol    = -1
-    cidr_blocks = ["162.168.2.0/24"]
+    cidr_blocks = ["162.168.2.0/32"]
   }
 
   ingress {
@@ -507,6 +506,6 @@ resource "aws_security_group" "overlapping_security_group" {
     from_port   = 0
     to_port     = 0
     protocol    = -1
-    cidr_blocks = ["162.168.2.0/25"]
+    cidr_blocks = ["162.168.2.0/32"]
   }
 }
