@@ -13,8 +13,14 @@ resource "aws_vpc" "main" {
   }
 }
 
+resource "aws_kms_key" "name" {
+  name = "cloudwatch"
+  enable_key_rotation = true
+}
+
 resource "aws_cloudwatch_log_group" "example" {
   name = "/aws/vpc-flow-logs"
+  kms_key_id = aws_kms_key.name.id
 }
 
 resource "aws_iam_role" "example" {
