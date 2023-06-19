@@ -24,8 +24,3 @@ variable "vpc_cidr_v4" {
 variable "vpc_cidr_v6" {
   description = "Ipv6 CIDR of created VPC"
 }
-
-variable "ec2_password" {
-  description = "Password in ec2 userdata"
-  type = string
-}
