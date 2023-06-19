@@ -18,7 +18,12 @@ resource "aws_iam_group_policy" "inline_group_policy" {
         "ec2:*"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": "*",
+      "Condition": {
+          "Bool": {
+              "aws:MultiFactorAuthPresent": ["true"]
+          }
+      }
     }
   ]
 }
@@ -123,12 +128,12 @@ EOF
 resource "aws_iam_account_password_policy" "main" {
   count =  1 
 
-  minimum_password_length        =  6
-  require_lowercase_characters   = false
-  require_numbers                = false
-  require_uppercase_characters   = false
-  require_symbols                = false
-  password_reuse_prevention      =  0
+  minimum_password_length        =  15
+  require_lowercase_characters   = true
+  require_numbers                = true
+  require_uppercase_characters   = true
+  require_symbols                = true
+  password_reuse_prevention      =  30
   max_password_age =  0 
 }
 
@@ -143,9 +148,13 @@ resource "aws_iam_policy" "policy" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": "*",
+      "NotAction": [
+        "ec2:*"
+      ],
       "Effect": "Allow",
-      "Resource": "*"
+      "NotResource": [
+        "ec2:*"
+      ]
     }
   ]
 }
@@ -159,9 +168,7 @@ resource "aws_iam_group" "admin_not_indicated" {
   path = "/"
 }
 
-
-
-resource "aws_iam_policy" "admin_not_indicated_policy" {
+resource "aws_iam_policy" "admin_not_indicated_policy"{
   count =  1 
 
 
@@ -172,9 +179,18 @@ resource "aws_iam_policy" "admin_not_indicated_policy" {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": "*",
+      "NotAction": [
+        "ec2:*"
+      ],
       "Effect": "Allow",
-      "Resource": "*"
+      "NotResource": [
+        "ec2:*"
+      ],
+      "Condition": {
+          "Bool": {
+              "aws:MultiFactorAuthPresent": ["true"]
+          }
+      }
     }
   ]
 }
