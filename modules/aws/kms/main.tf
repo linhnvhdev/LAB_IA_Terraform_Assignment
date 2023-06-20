@@ -46,3 +46,8 @@ resource "aws_kms_key" "s3_encryption_key" {
   enable_key_rotation = true
   count               = 1
 }
+
+resource "aws_kms_key" "secretsmanager_encryption_key" {
+    description = "key for secrets manager"
+    enable_key_rotation = true
+ }

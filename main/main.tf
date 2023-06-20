@@ -55,7 +55,7 @@ module "rds" {
 
 module "s3" {
   source = "../modules/aws/s3"
-  s3_kms_key_id = module.kms.s3_encryption_key.id 
+  s3_kms_key_id = module.kms.s3_encryption_key_id
 }
 
 module "ses" {
@@ -68,4 +68,6 @@ module "sns" {
 
 module "secretsmanager" {
   source = "../modules/aws/secretsmanager"
+  ec2_password = var.ec2_secret
+  kms_key_id = module.kms.secretsmanager_encryption_key_id
 }
