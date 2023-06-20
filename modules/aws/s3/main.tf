@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "main" {
   }
 
   dynamic "logging" {
-    for_each = [aws_s3_bucket.logging.id]
+    for_each = [aws_s3_bucket.logging[0].id]
 
     content {
       target_bucket = aws_s3_bucket.logging[0].id
@@ -44,7 +44,24 @@ resource "aws_s3_bucket" "logging" {
   acl           = var.bucket_acl
   force_destroy = true
 
-  count = 0
+  versioning {
+    enabled = true
+  }
+
+  dynamic "server_side_encryption_configuration" {
+    for_each = [var.s3_kms_key_id]
+
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          sse_algorithm     = "aws:kms"
+          kms_master_key_id = var.s3_kms_key_id
+        }
+      }
+    }
+  }
+
+  count = 1
 }
 
 data "aws_iam_policy_document" "force_ssl_only_access" {
@@ -124,7 +141,7 @@ resource "aws_s3_bucket" "getonly" {
   }
 
   dynamic "logging" {
-    for_each = [aws_s3_bucket.logging.id]
+    for_each = [aws_s3_bucket.logging[0].id]
 
     content {
       target_bucket = aws_s3_bucket.logging[0].id
@@ -169,14 +186,14 @@ resource "aws_s3_bucket" "public" {
       rule {
         apply_server_side_encryption_by_default {
           sse_algorithm     = "aws:kms"
-          kms_master_key_id = var.s3_kms_key_id0
+          kms_master_key_id = var.s3_kms_key_id
         }
       }
     }
   }
 
   dynamic "logging" {
-    for_each = [aws_s3_bucket.logging.id]
+    for_each = [aws_s3_bucket.logging[0].id]
 
     content {
       target_bucket = aws_s3_bucket.logging[0].id
@@ -203,6 +220,14 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_getonly
 
 resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_public" {
   bucket                  = aws_s3_bucket.public[0].id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_logging" {
+  bucket                  = aws_s3_bucket.logging[0].id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true

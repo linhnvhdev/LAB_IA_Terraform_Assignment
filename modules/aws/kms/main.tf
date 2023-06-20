@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_kms_key" "main" {
   description             = "sadcloud key"
   enable_key_rotation = true
@@ -25,7 +27,7 @@ resource "aws_kms_key" "exposed" {
     {
       "Sid": "Default IAM policy for KMS keys",
       "Effect": "Allow",
-      "Principal": {"AWS" : "*"},
+      "Principal": {"AWS" : "${data.aws_caller_identity.current.arn}"},
       "Action": "kms:*",
       "Resource": "*"
     }
@@ -44,7 +46,6 @@ resource "aws_kms_alias" "exposed" {
 resource "aws_kms_key" "s3_encryption_key" {
   description         = "key for s3 buckets"
   enable_key_rotation = true
-  count               = 1
 }
 
 resource "aws_kms_key" "secretsmanager_encryption_key" {

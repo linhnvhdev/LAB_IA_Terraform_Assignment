@@ -37,7 +37,6 @@ EOF
 }
 
 resource "aws_flow_log" "flow_log" {
-  name            = "vpc-flow-log"
   vpc_id          = aws_vpc.main[0].id
   traffic_type    = "ALL"
   log_destination = aws_cloudwatch_log_group.flow_log_group.arn
