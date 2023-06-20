@@ -18,3 +18,7 @@ output "performance_insights_key_id" {
   value = aws_kms_key.performance_insights_kms.id
 }
 
+output "sns_encryption_key_id" {
+  description = "key id of customer managed key to encrypt sns"
+  value = aws_kms_key.sns_encryption_key.id
+}

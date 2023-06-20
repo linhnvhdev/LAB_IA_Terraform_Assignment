@@ -42,7 +42,7 @@ resource "aws_kms_alias" "exposed" {
 }
 
 resource "aws_kms_key" "s3_encryption_key" {
-  description         = "key"
+  description         = "key for s3 buckets"
   enable_key_rotation = true
   count               = 1
 }
@@ -61,3 +61,7 @@ resource "aws_kms_key" "performance_insights_kms" {
   description = "performance insights kms key"
   enable_key_rotation = true
 }
+ resource "aws_kms_key" "sns_encryption_key" {
+    description = "key for sns"
+    enable_key_rotation = true
+ }

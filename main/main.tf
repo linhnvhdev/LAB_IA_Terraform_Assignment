@@ -66,6 +66,7 @@ module "ses" {
 
 module "sns" {
   source = "../modules/aws/sns"
+  sns_kms_key_id = module.kms.sns_encryption_key_id
 }
 
 module "secretsmanager" {
