@@ -1,22 +1,23 @@
 resource "aws_s3_bucket" "main" {
   bucket_prefix = var.name
-  acl    = "private"
+  acl           = "private"
   force_destroy = true
 
   dynamic "server_side_encryption_configuration" {
-    for_each =  [] 
+    for_each = [aws_kms_key.s3_encryption_key.id]
 
     content {
       rule {
         apply_server_side_encryption_by_default {
-          sse_algorithm = "AES256"
+          sse_algorithm     = "aws:kms"
+          kms_master_key_id = aws_kms_key.s3_encryption_key.id
         }
       }
     }
   }
 
   dynamic "logging" {
-    for_each =  [] 
+    for_each = [aws_s3_bucket.logging.id]
 
     content {
       target_bucket = aws_s3_bucket.logging[0].id
@@ -25,12 +26,12 @@ resource "aws_s3_bucket" "main" {
   }
 
   versioning {
-      enabled =  true 
-      mfa_delete = true
+    enabled    = true
+    mfa_delete = true
   }
 
   dynamic "website" {
-    for_each =  [] 
+    for_each = []
 
     content {
       index_document = "index.html"
@@ -40,10 +41,10 @@ resource "aws_s3_bucket" "main" {
 
 resource "aws_s3_bucket" "logging" {
   bucket_prefix = var.name
-  acl    = var.bucket_acl
+  acl           = var.bucket_acl
   force_destroy = true
 
-  count =  0 
+  count = 0
 }
 
 data "aws_iam_policy_document" "force_ssl_only_access" {
@@ -77,7 +78,7 @@ resource "aws_s3_bucket_policy" "force_ssl_only_access" {
   bucket = aws_s3_bucket.main.id
   policy = data.aws_iam_policy_document.force_ssl_only_access.json
 
-  count = 1 
+  count = 1
 }
 
 data "aws_iam_policy_document" "getonly" {
@@ -102,11 +103,33 @@ data "aws_iam_policy_document" "getonly" {
 
 resource "aws_s3_bucket" "getonly" {
   bucket_prefix = "sadcloudhetonlys3"
+  acl           = "private"
   force_destroy = true
   count = 1
   versioning {
+    enabled    = true
     mfa_delete = true
-    enabled = true
+  }
+  dynamic "server_side_encryption_configuration" {
+    for_each = [aws_kms_key.s3_encryption_key.id]
+
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          sse_algorithm     = "aws:kms"
+          kms_master_key_id = aws_kms_key.s3_encryption_key.id
+        }
+      }
+    }
+  }
+
+  dynamic "logging" {
+    for_each = [aws_s3_bucket.logging.id]
+
+    content {
+      target_bucket = aws_s3_bucket.logging[0].id
+      target_prefix = var.name
+    }
   }
 }
 
@@ -132,19 +155,64 @@ data "aws_iam_policy_document" "public" {
 
 resource "aws_s3_bucket" "public" {
   bucket_prefix = "sadcloudhetonlys3"
+  acl           = "private"
   force_destroy = true
-  count = 1
+  count         = 1
   versioning {
-    enabled = true
+    enabled    = true
     mfa_delete = true
+  }
+  dynamic "server_side_encryption_configuration" {
+    for_each = [aws_kms_key.s3_encryption_key.id]
+
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          sse_algorithm     = "aws:kms"
+          kms_master_key_id = aws_kms_key.s3_encryption_key.id
+        }
+      }
+    }
+  }
+
+  dynamic "logging" {
+    for_each = [aws_s3_bucket.logging.id]
+
+    content {
+      target_bucket = aws_s3_bucket.logging[0].id
+      target_prefix = var.name
+    }
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "bucket_public_access_block" {
-  bucket = aws_s3_bucket.main.id
-  block_public_acls = true
-  block_public_policy = true
-  ignore_public_acls = true
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_main" {
+  bucket                  = aws_s3_bucket.main.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_getonly" {
+  bucket                  = aws_s3_bucket.getonly[0].id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_public" {
+  bucket                  = aws_s3_bucket.public[0].id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+
+resource "aws_kms_key" "s3_encryption_key" {
+  description         = "key"
+  enable_key_rotation = true
+  count               = 1
 }
 
