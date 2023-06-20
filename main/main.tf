@@ -1,6 +1,7 @@
 # Creates a single VPC with a subnet, internet gateway, and associated route table.
 module "network" {
   source = "../modules/aws/network"
+  kms_key_id = module.kms.cloudwatch_encryption_key_id
 }
 
 ############## SERVICES ##############
@@ -51,6 +52,7 @@ module "rds" {
 
   main_subnet_id = module.network.main_subnet_id
   secondary_subnet_id = module.network.secondary_subnet_id
+  kms_key_id = module.kms.performance_insights_key_id
 }
 
 module "s3" {
