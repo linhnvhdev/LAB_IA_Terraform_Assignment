@@ -15,3 +15,8 @@ variable "sse_algorithm" {
   type        = string
   default     = "AES256"
 }
+
+variable "s3_kms_key_id" {
+  description = "s3 kms key"
+  type = string
+}
