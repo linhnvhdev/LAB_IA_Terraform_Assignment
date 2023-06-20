@@ -5,6 +5,6 @@ resource "aws_secretsmanager_secret" "ec2_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "service_user" {
-  secret_id     = aws_secretsmanager_secret.ec2_secret
+  secret_id     = aws_secretsmanager_secret.ec2_secret.id
   secret_string = var.ec2_password
 }
