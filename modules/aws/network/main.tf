@@ -13,17 +13,12 @@ resource "aws_vpc" "main" {
   }
 }
 
-resource "aws_kms_key" "name" {
-  name = "cloudwatch"
-  enable_key_rotation = true
-}
-
-resource "aws_cloudwatch_log_group" "example" {
+resource "aws_cloudwatch_log_group" "flow_log_group" {
   name = "/aws/vpc-flow-logs"
-  kms_key_id = aws_kms_key.name.id
+  kms_key_id = var.kms_key_id
 }
 
-resource "aws_iam_role" "example" {
+resource "aws_iam_role" "flow_log_role" {
   name               = "flow-log-role"
   assume_role_policy = <<EOF
 {
@@ -41,12 +36,12 @@ resource "aws_iam_role" "example" {
 EOF
 }
 
-resource "aws_flow_log" "example" {
-  name            = "example-flow-log"
-  vpc_id          = aws_vpc.main.id
+resource "aws_flow_log" "flow_log" {
+  name            = "vpc-flow-log"
+  vpc_id          = aws_vpc.main[0].id
   traffic_type    = "ALL"
-  log_destination = aws_cloudwatch_log_group.example.arn
-  iam_role_arn    = aws_iam_role.example.arn
+  log_destination = aws_cloudwatch_log_group.flow_log_group.arn
+  iam_role_arn    = aws_iam_role.flow_log_role.arn
 }
 
 # grab AZs
