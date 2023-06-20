@@ -12,3 +12,12 @@ resource "aws_cloudwatch_metric_alarm" "main" {
 
   alarm_actions = null
 }
+
+module "kms_cloudwatch_flow_log" {
+  source = "../kms"
+}
+
+resource "aws_cloudwatch_log_group" "flow_log" {
+  name = "/aws/vpc-flow-logs"
+  kms_key_id = module.kms_cloudwatch_flow_log.kms_cloudwatch_flow_log_id
+}

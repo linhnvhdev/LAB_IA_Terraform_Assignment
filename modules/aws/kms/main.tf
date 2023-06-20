@@ -1,6 +1,6 @@
 resource "aws_kms_key" "main" {
   description             = "sadcloud key"
-  enable_key_rotation = false
+  enable_key_rotation = true
   count =  1 
 }
 
@@ -39,4 +39,9 @@ resource "aws_kms_alias" "exposed" {
   target_key_id = aws_kms_key.exposed[0].key_id
 
   count =  1 
+}
+
+resource "aws_kms_key" "cloudwatch_flow_log" {
+  name = "cloudwatch_flow_log"
+  enable_key_rotation = true
 }
