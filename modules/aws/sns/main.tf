@@ -1,7 +1,7 @@
 resource "aws_sns_topic" "main" {
   name = var.name
-
   count = 1
+  kms_master_key_id = var.sns_encryption_key_id
 }
 
 resource "aws_sns_topic_policy" "main-policy" {
