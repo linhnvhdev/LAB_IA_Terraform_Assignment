@@ -40,3 +40,9 @@ resource "aws_kms_alias" "exposed" {
 
   count =  1 
 }
+
+resource "aws_kms_key" "s3_encryption_key" {
+  description         = "key"
+  enable_key_rotation = true
+  count               = 1
+}

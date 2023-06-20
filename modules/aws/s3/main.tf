@@ -4,13 +4,13 @@ resource "aws_s3_bucket" "main" {
   force_destroy = true
 
   dynamic "server_side_encryption_configuration" {
-    for_each = [aws_kms_key.s3_encryption_key.id]
+    for_each = [var.s3_kms_key_id]
 
     content {
       rule {
         apply_server_side_encryption_by_default {
           sse_algorithm     = "aws:kms"
-          kms_master_key_id = aws_kms_key.s3_encryption_key.id
+          kms_master_key_id = var.s3_kms_key_id
         }
       }
     }
@@ -111,13 +111,13 @@ resource "aws_s3_bucket" "getonly" {
     mfa_delete = true
   }
   dynamic "server_side_encryption_configuration" {
-    for_each = [aws_kms_key.s3_encryption_key.id]
+    for_each = [var.s3_kms_key_id]
 
     content {
       rule {
         apply_server_side_encryption_by_default {
           sse_algorithm     = "aws:kms"
-          kms_master_key_id = aws_kms_key.s3_encryption_key.id
+          kms_master_key_id = var.s3_kms_key_id
         }
       }
     }
@@ -163,13 +163,13 @@ resource "aws_s3_bucket" "public" {
     mfa_delete = true
   }
   dynamic "server_side_encryption_configuration" {
-    for_each = [aws_kms_key.s3_encryption_key.id]
+    for_each = [var.s3_kms_key_id]
 
     content {
       rule {
         apply_server_side_encryption_by_default {
           sse_algorithm     = "aws:kms"
-          kms_master_key_id = aws_kms_key.s3_encryption_key.id
+          kms_master_key_id = var.s3_kms_key_id0
         }
       }
     }
@@ -210,9 +210,4 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_public"
 }
 
 
-resource "aws_kms_key" "s3_encryption_key" {
-  description         = "key"
-  enable_key_rotation = true
-  count               = 1
-}
 

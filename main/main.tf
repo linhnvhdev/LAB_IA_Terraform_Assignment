@@ -26,6 +26,8 @@ module "ec2" {
 
    main_subnet_id = module.network.main_subnet_id
    vpc_id = module.network.vpc_id
+   vpc_cidr_v4 = module.network.vpc_cidr
+   vpc_cidr_v6 = module.network.vpc_cidr_v6
 }
 
 module "elbv2" {
@@ -53,6 +55,7 @@ module "rds" {
 
 module "s3" {
   source = "../modules/aws/s3"
+  s3_kms_key_id = module.kms.s3_encryption_key.id 
 }
 
 module "ses" {
