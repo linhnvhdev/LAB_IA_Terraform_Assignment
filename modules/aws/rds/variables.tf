@@ -14,3 +14,8 @@ variable "secondary_subnet_id" {
   description = "ID of secondary subnet"
   default = "default_secondary_subnet_id"
 }
+
+variable "kms_key_id" {
+  description = "kms key id for performance insights"
+  type = string
+}

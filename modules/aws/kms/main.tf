@@ -51,3 +51,13 @@ resource "aws_kms_key" "secretsmanager_encryption_key" {
     description = "key for secrets manager"
     enable_key_rotation = true
  }
+
+ resource "aws_kms_key" "cloudwatch_encryption_key" {
+  description = "key for cloudwatch"
+  enable_key_rotation = true
+}
+
+resource "aws_kms_key" "performance_insights_kms" {
+  description = "performance insights kms key"
+  enable_key_rotation = true
+}

@@ -24,10 +24,5 @@ resource "aws_db_instance" "main" {
   iam_database_authentication_enabled = true
   deletion_protection = true
   performance_insights_enabled = true
-  performance_insights_kms_key_id = aws_kms_key.performance_insights_kms.id
-}
-
-resource "aws_kms_key" "performance_insights_kms" {
-  name = "performance_insights_kms"
-  enable_key_rotation = true
+  performance_insights_kms_key_id = var.kms_key_id
 }
