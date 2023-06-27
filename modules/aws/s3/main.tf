@@ -3,66 +3,52 @@ resource "aws_s3_bucket" "main" {
   acl           = "private"
   force_destroy = true
 
-  dynamic "server_side_encryption_configuration" {
-    for_each = [var.s3_kms_key_id]
-
-    content {
-      rule {
-        apply_server_side_encryption_by_default {
-          sse_algorithm     = "aws:kms"
-          kms_master_key_id = var.s3_kms_key_id
-        }
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.s3_kms_key_id
       }
     }
   }
-
-  dynamic "logging" {
-    for_each = [aws_s3_bucket.logging[0].id]
-
-    content {
-      target_bucket = aws_s3_bucket.logging[0].id
-      target_prefix = var.name
-    }
+  
+  logging {
+    target_bucket = module.logging.s3_bucket_id
+    target_prefix = var.name
   }
 
   versioning {
     enabled    = true
-    mfa_delete = true
+    mfa_delete = false
   }
 
-  dynamic "website" {
-    for_each = []
-
-    content {
-      index_document = "index.html"
-    }
+  website {
+    index_document = "index.html"
   }
 }
 
-resource "aws_s3_bucket" "logging" {
-  bucket_prefix = var.name
-  acl           = var.bucket_acl
+module "logging" {
+  source = "terraform-aws-modules/s3-bucket/aws"
+  version = "3.14.0"
+  bucket = "logging-bucket-1wfq1h3"
+  acl    = "log-delivery-write"
   force_destroy = true
 
-  versioning {
-    enabled = true
-  }
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
 
-  dynamic "server_side_encryption_configuration" {
-    for_each = [var.s3_kms_key_id]
-
-    content {
-      rule {
-        apply_server_side_encryption_by_default {
-          sse_algorithm     = "aws:kms"
-          kms_master_key_id = var.s3_kms_key_id
-        }
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        kms_master_key_id = var.s3_kms_key_id
+        sse_algorithm     = "aws:kms"
       }
     }
   }
-
-  count = 1
+  attach_elb_log_delivery_policy = true
 }
+
+
 
 data "aws_iam_policy_document" "force_ssl_only_access" {
   # Force SSL access
@@ -125,28 +111,20 @@ resource "aws_s3_bucket" "getonly" {
   count = 1
   versioning {
     enabled    = true
-    mfa_delete = true
+    mfa_delete = false
   }
-  dynamic "server_side_encryption_configuration" {
-    for_each = [var.s3_kms_key_id]
-
-    content {
-      rule {
-        apply_server_side_encryption_by_default {
-          sse_algorithm     = "aws:kms"
-          kms_master_key_id = var.s3_kms_key_id
-        }
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.s3_kms_key_id
       }
     }
   }
 
-  dynamic "logging" {
-    for_each = [aws_s3_bucket.logging[0].id]
-
-    content {
-      target_bucket = aws_s3_bucket.logging[0].id
-      target_prefix = var.name
-    }
+  logging {
+    target_bucket = module.logging.s3_bucket_id
+    target_prefix = var.name
   }
 }
 
@@ -177,28 +155,20 @@ resource "aws_s3_bucket" "public" {
   count         = 1
   versioning {
     enabled    = true
-    mfa_delete = true
+    mfa_delete = false
   }
-  dynamic "server_side_encryption_configuration" {
-    for_each = [var.s3_kms_key_id]
-
-    content {
-      rule {
-        apply_server_side_encryption_by_default {
-          sse_algorithm     = "aws:kms"
-          kms_master_key_id = var.s3_kms_key_id
-        }
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.s3_kms_key_id
       }
     }
   }
 
-  dynamic "logging" {
-    for_each = [aws_s3_bucket.logging[0].id]
-
-    content {
-      target_bucket = aws_s3_bucket.logging[0].id
-      target_prefix = var.name
-    }
+  logging {
+    target_bucket = module.logging.s3_bucket_id
+    target_prefix = var.name
   }
 }
 
@@ -227,7 +197,7 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_public"
 }
 
 resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_logging" {
-  bucket                  = aws_s3_bucket.logging[0].id
+  bucket                  = module.logging.s3_bucket_id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
