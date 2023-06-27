@@ -10,7 +10,7 @@ resource "aws_ebs_volume" "main" {
   encrypted = true
 
   count =  1 
-  kms_key_id = aws_kms_key.ebs_encryption[count.index].id
+  kms_key_id = aws_kms_key.ebs_encryption[0].arn
 }
 
 resource "aws_ebs_encryption_by_default" "main" {

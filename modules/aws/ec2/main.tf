@@ -435,6 +435,8 @@ resource "aws_security_group" "unused_security_group" {
   description = "unused security group"
   count =  1 
 
+  vpc_id = var.vpc_id
+
   ingress {
     description = "Allow inbound traffic from unknown cidr"
     from_port   = 0
@@ -493,6 +495,9 @@ resource "aws_security_group" "overlapping_security_group" {
   name  = "${var.name}-overlapping_security_group"
   description = "Security group with 2 overlapping rule"
   count =  1 
+
+  vpc_id = var.vpc_id
+
   ingress {
     description = "Allow inbound traffic from cidr 162.168.2.0/24"
     from_port   = 0
@@ -501,6 +506,7 @@ resource "aws_security_group" "overlapping_security_group" {
     cidr_blocks = ["162.168.2.0/32"]
   }
 
+  /**
   ingress {
     description = "Allow inbound traffic from cidr 162.168.2.0/25"
     from_port   = 0
@@ -508,4 +514,5 @@ resource "aws_security_group" "overlapping_security_group" {
     protocol    = -1
     cidr_blocks = ["162.168.2.0/32"]
   }
+  **/
 }

@@ -15,7 +15,7 @@ output "cloudwatch_encryption_key_id" {
 
 output "performance_insights_key_id" {
   description = "key id rds performance insights"
-  value = aws_kms_key.performance_insights_kms.id
+  value = aws_kms_key.performance_insights_kms.arn
 }
 
 output "sns_encryption_key_id" {
