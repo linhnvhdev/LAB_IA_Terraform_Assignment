@@ -27,7 +27,7 @@ resource "aws_kms_key" "exposed" {
     {
       "Sid": "Default IAM policy for KMS keys",
       "Effect": "Allow",
-      "Principal": {"AWS" : "${data.aws_caller_identity.current.arn}"},
+      "Principal": {"AWS" : "arn:aws:iam::${data.aws_caller_identity.current.id}:root"},
       "Action": "kms:*",
       "Resource": "*"
     }
@@ -35,6 +35,7 @@ resource "aws_kms_key" "exposed" {
 }
 EOF
 }
+//Row 30 to allow from root, normally it would be "Principal": {"AWS" : "${data.aws_caller_identity.current.arn}"}
 
 resource "aws_kms_alias" "exposed" {
   name          = "alias/exposed"
