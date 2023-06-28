@@ -22,3 +22,7 @@ output "sns_encryption_key_id" {
   description = "key id of customer managed key to encrypt sns"
   value = aws_kms_key.sns_encryption_key.id
 }
+
+# output "kms_id_cloudwatch" {
+#   value = aws_kms_key.cloudwatch.id
+# }

@@ -202,3 +202,92 @@ resource "aws_iam_group_policy_attachment" "admin_not_indicated_policy-attach" {
   policy_arn = aws_iam_policy.admin_not_indicated_policy[0].arn
   count =  1 
 }
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["vpc-flow-logs.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "flow_log_cloudwatch" {
+  name               = "flow_log_cloudwatch"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+data "aws_iam_policy_document" "flow_log_cloudwatch" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+    ]
+
+    resources = [var.cloudwatch_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "flow_log_cloudwatch" {
+  name   = "flow_log_cloudwatch"
+  role   = aws_iam_role.flow_log_cloudwatch.id
+  policy = data.aws_iam_policy_document.flow_log_cloudwatch.json
+}
+
+# data "aws_caller_identity" "current" {}
+
+# data "aws_partition" "current" {}
+
+# data "aws_region" "current" {}
+
+# data "aws_iam_policy_document" "cloudwatch" {
+#   policy_id = "key-policy-cloudwatch"
+#   statement {
+#     sid = "Enable IAM User Permissions"
+#     actions = [
+#       "kms:*",
+#     ]
+#     effect = "Allow"
+#     principals {
+#       type = "AWS"
+#       identifiers = [
+#         format(
+#           "arn:%s:iam::%s:root",
+#           data.aws_partition.current.partition,
+#           data.aws_caller_identity.current.account_id
+#         )
+#       ]
+#     }
+#     resources = ["*"]
+#   }
+#   statement {
+#     sid = "AllowCloudWatchLogs"
+#     actions = [
+#       "kms:Encrypt*",
+#       "kms:Decrypt*",
+#       "kms:ReEncrypt*",
+#       "kms:GenerateDataKey*",
+#       "kms:Describe*"
+#     ]
+#     effect = "Allow"
+#     principals {
+#       type = "Service"
+#       identifiers = [
+#         format(
+#           "logs.%s.amazonaws.com",
+#           data.aws_region.current.name
+#         )
+#       ]
+#     }
+#     resources = ["*"]
+#   }
+# }

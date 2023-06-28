@@ -12,3 +12,7 @@ resource "aws_cloudwatch_metric_alarm" "main" {
 
   alarm_actions = null
 }
+
+resource "aws_cloudwatch_log_group" "flow_log" {
+  name = "flow_log"
+}

@@ -4,7 +4,10 @@ variable "name" {
   default     = "sadcloud"
 }
 
-variable "kms_key_id" {
-  description = "kms key id for cloudwatch log"
+variable "iam_role_arn_flow_log_cloudwatch" {
+  type = string
+}
+
+variable "cloudwatch_arn_flow_logs" {
   type = string
 }
