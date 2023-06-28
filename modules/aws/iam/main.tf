@@ -202,3 +202,21 @@ resource "aws_iam_group_policy_attachment" "admin_not_indicated_policy-attach" {
   policy_arn = aws_iam_policy.admin_not_indicated_policy[0].arn
   count =  1 
 }
+
+resource "aws_iam_role" "flow_log_role_hello" {
+  name               = "flow-log-role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "vpc-flow-logs.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}

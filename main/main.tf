@@ -1,7 +1,8 @@
 # Creates a single VPC with a subnet, internet gateway, and associated route table.
 module "network" {
   source = "../modules/aws/network"
-  kms_key_id = module.kms.cloudwatch_encryption_key_id
+  cloudwatch_flow_log_arn = module.cloudwatch.cloudwatch_flow_log_arn
+  flow_log_role_arn = module.iam.flow_log_role_arn
 }
 
 ############## SERVICES ##############
@@ -12,6 +13,7 @@ module "cloudtrail" {
 
 module "cloudwatch" {
   source = "../modules/aws/cloudwatch"
+  kms_key_id = module.kms.cloudwatch_encryption_key_id
 }
 
 module "config" {
