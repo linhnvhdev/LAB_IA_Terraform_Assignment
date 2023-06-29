@@ -1,16 +1,15 @@
-resource "aws_sns_topic" "main" {
-  name = var.name
-  count = 1
+module "main" {
+  source  = "terraform-aws-modules/sns/aws"
+  name  = var.name
   kms_master_key_id = var.sns_kms_key_id
 }
 
 resource "aws_sns_topic_policy" "main-policy" {
-  arn = aws_sns_topic.main[0].arn
+  arn = module.main.topic_arn
 
   policy = data.aws_iam_policy_document.sns-topic-policy[0].json
   count = 1
 }
-
 
 data "aws_iam_policy_document" "sns-topic-policy" {
   statement {
@@ -34,7 +33,7 @@ data "aws_iam_policy_document" "sns-topic-policy" {
     }
 
     resources = [
-      aws_sns_topic.main[0].arn,
+      module.main.topic_arn,
     ]
   }
   count = 1
