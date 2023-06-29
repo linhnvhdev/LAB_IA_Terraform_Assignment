@@ -73,7 +73,46 @@ module "cloudwatch_encryption_key" {
   description = "key for cloudwatch"
   enable_key_rotation = true
   aliases = ["alias/cloudwatch_encrypt"]
+  policy = data.aws_iam_policy_document.cloudwatch_encrypt.json
 }
+
+data "aws_iam_policy_document" "cloudwatch_encrypt" {
+  version = "2012-10-17"
+
+  statement {
+    sid    = "EnableIAMUserPermissions"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.id}:root"]
+    }
+
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowCloudWatchLogs"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logs.ap-southeast-1.amazonaws.com"]
+    }
+
+    actions   = [
+      "kms:Encrypt*",
+      "kms:Decrypt*",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:Describe*"
+    ]
+
+    resources = ["*"]
+  }
+}
+
 module "performance_insights_kms" {
   source = "terraform-aws-modules/kms/aws"
   description = "performance insights kms key"
