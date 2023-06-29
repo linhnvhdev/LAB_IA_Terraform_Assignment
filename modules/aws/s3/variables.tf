@@ -1,7 +1,7 @@
 variable "name" {
   description = "bucket name"
   type        = string
-  default     = "sadcloud-1wfq1h3"
+  default     = "sascloud-1wfq1h3"
 }
 
 variable "bucket_acl" {

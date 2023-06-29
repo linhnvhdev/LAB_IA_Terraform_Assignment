@@ -1,32 +1,4 @@
 data "aws_caller_identity" "current" {}
-# resource "aws_s3_bucket" "main" {
-#   bucket_prefix = var.name
-#   acl           = "private"
-#   force_destroy = true
-
-#   server_side_encryption_configuration {
-#     rule {
-#       apply_server_side_encryption_by_default {
-#         sse_algorithm     = "aws:kms"
-#         kms_master_key_id = var.s3_kms_key_id
-#       }
-#     }
-#   }
-  
-#   logging {
-#     target_bucket = module.logging.s3_bucket_id
-#     target_prefix = var.name
-#   }
-
-#   versioning {
-#     enabled    = true
-#     mfa_delete = false
-#   }
-
-#   website {
-#     index_document = "index.html"
-#   }
-# }
 
 module "main" {
   source = "terraform-aws-modules/s3-bucket/aws"
@@ -61,7 +33,7 @@ module "main" {
 module "logging" {
   source = "terraform-aws-modules/s3-bucket/aws"
   version = "3.14.0"
-  bucket = "logging-bucket-1wfq1h3"
+  bucket = "logging-bucket-1wfq1h3xyz"
   acl    = "log-delivery-write"
   force_destroy = true
 
@@ -71,7 +43,8 @@ module "logging" {
   server_side_encryption_configuration = {
     rule = {
       apply_server_side_encryption_by_default = {
-        sse_algorithm     = "AES256"
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.s3_kms_key_id
       }
     }
   }
@@ -118,14 +91,15 @@ data "aws_iam_policy_document" "receive_logs" {
     effect = "Allow"
 
     principals {
-      service = "logging.s3.amazonaws.com"
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
     }
 
     actions = ["s3:PutObject"]
 
     resources = [
       module.logging.s3_bucket_arn,
-      "${module.logging.s3_bucket_arn}/*",
+      "${module.logging.s3_bucket_arn}/*"
     ]
   }
 }
@@ -157,35 +131,38 @@ data "aws_iam_policy_document" "getonly" {
     actions = ["s3:GetObject"]
 
     resources = [
-      aws_s3_bucket.getonly[0].arn,
-      "${aws_s3_bucket.getonly[0].arn}/*",
+      module.getonly.s3_bucket_arn,
+      "${module.getonly.s3_bucket_arn}/*",
     ]
   }
 
   count = 1
 }
 
-resource "aws_s3_bucket" "getonly" {
-  bucket_prefix = "sadcloudhetonlys3"
-  acl           = "private"
+module "getonly" {
+  source = "terraform-aws-modules/s3-bucket/aws"
+  version = "3.14.0"
+  bucket = "sascloud-getonly-s3"
+  acl = "private"
   force_destroy = true
-  count = 1
-  versioning {
-    enabled    = true
-    mfa_delete = false
-  }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
         sse_algorithm     = "aws:kms"
         kms_master_key_id = var.s3_kms_key_id
       }
     }
   }
+  versioning = {
+    enabled = true
+  }
 
-  logging {
+  logging = {
     target_bucket = module.logging.s3_bucket_id
-    target_prefix = var.name
+    target_prefix = "sascloud-getonly-1wfq1h3"
   }
 }
 
@@ -201,35 +178,38 @@ data "aws_iam_policy_document" "public" {
     actions = ["s3:*"]
 
     resources = [
-      aws_s3_bucket.public[0].arn,
-      "${aws_s3_bucket.public[0].arn}/*",
+      module.public.s3_bucket_arn,
+      "${module.public.s3_bucket_arn}/*",
     ]
   }
 
   count = 1
 }
 
-resource "aws_s3_bucket" "public" {
-  bucket_prefix = "sadcloudhetonlys3"
-  acl           = "private"
+module "public" {
+  source = "terraform-aws-modules/s3-bucket/aws"
+  version = "3.14.0"
+  bucket = "sascloud-public-s3"
+  acl = "private"
   force_destroy = true
-  count         = 1
-  versioning {
-    enabled    = true
-    mfa_delete = false
-  }
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
         sse_algorithm     = "aws:kms"
         kms_master_key_id = var.s3_kms_key_id
       }
     }
   }
+  versioning = {
+    enabled = true
+  }
 
-  logging {
+  logging = {
     target_bucket = module.logging.s3_bucket_id
-    target_prefix = var.name
+    target_prefix = "sascloud-public-1wfq1h3"
   }
 }
 
@@ -242,7 +222,7 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_main" {
 }
 
 resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_getonly" {
-  bucket                  = aws_s3_bucket.getonly[0].id
+  bucket                  = module.getonly.s3_bucket_id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -250,7 +230,7 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_getonly
 }
 
 resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_public" {
-  bucket                  = aws_s3_bucket.public[0].id
+  bucket                  = module.public.s3_bucket_id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -264,6 +244,8 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_logging
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+
 
 
 
