@@ -1,3 +1,5 @@
+/*
+
 resource "aws_s3_bucket" "access_logging" {
   bucket_prefix = var.name
   acl    = "log-delivery-write"
@@ -10,6 +12,69 @@ resource "aws_s3_bucket" "access_logging" {
   count =  1 
 }
 
+*/
+
+module "alb" {
+  source  = "terraform-aws-modules/alb/aws"
+
+  name = "main-app-alb"
+
+  load_balancer_type = "application"
+
+  internal = true
+
+  enable_deletion_protection = false
+
+  vpc_id             = var.vpc_id
+  subnets            = [var.main_subnet_id,var.secondary_subnet_id]
+
+  access_logs = {
+    enabled = true
+    prefix  = "khanhtq"
+    bucket = var.logging_bucket
+  }
+
+  drop_invalid_header_fields = true
+
+  target_groups = [
+    {
+      name_prefix      = "pref-"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+    }
+  ]
+
+  https_listeners = [
+    {
+      port               = 443
+      protocol           = "HTTPS"
+      certificate_arn    = aws_iam_server_certificate.elb_main_cert[0].arn
+      ssl_policy = "ELBSecurityPolicy-TLS-1-2-2017-01"
+      target_group_index = 0
+    }
+  ]
+
+  tags = {
+    Environment = "Test"
+  }
+}
+
+
+resource "aws_iam_server_certificate" "elb_main_cert" {
+  name = "elb_main_cert"
+  certificate_body = file(
+    "${path.root}/static/example.crt.pem",
+  )
+  private_key = file(
+    "${path.root}/static/example.key.pem",
+  )
+
+  count =  1 
+}
+
+/*
+
 resource "aws_lb" "main" {
   load_balancer_type = "application"
   internal = true
@@ -17,7 +82,7 @@ resource "aws_lb" "main" {
   subnets = ["${var.main_subnet_id}","${var.secondary_subnet_id}"]
 
   access_logs {
-    bucket  = aws_s3_bucket.access_logging[0].bucket_prefix
+    bucket  = var.logging_bucket
     enabled = false
   }
 
@@ -33,24 +98,12 @@ resource "aws_lb_target_group" "main" {
   count =  1 
 }
 
-resource "aws_iam_server_certificate" "main" {
-  name = "test_cert"
-  certificate_body = file(
-    "${path.root}/static/example.crt.pem",
-  )
-  private_key = file(
-    "${path.root}/static/example.key.pem",
-  )
-
-  count =  1 
-}
-
 resource "aws_lb_listener" "main" {
   load_balancer_arn = aws_lb.main[0].arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        =  "ELBSecurityPolicy-TLS-1-2-2017-01" 
-  certificate_arn   = aws_iam_server_certificate.main[0].arn
+  certificate_arn   = aws_iam_server_certificate.main_cert[0].arn
 
   default_action {
     type             = "forward"
@@ -85,3 +138,4 @@ resource "aws_s3_bucket_public_access_block" "access_logging_bucket_public_acces
   restrict_public_buckets = true
   count =  1 
 }
+*/
