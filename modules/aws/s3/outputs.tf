@@ -1,4 +1,4 @@
 output "bucket_id" {
   description = "the bucket id"
-  value       = aws_s3_bucket.main.id
+  value       = module.main.s3_bucket_id
 }
