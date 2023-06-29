@@ -20,6 +20,7 @@ module "config" {
 
 module "ebs" {
   source = "../modules/aws/ebs"
+  ebs_encrypt_key = module.kms.ebs_encryption_key_arn
 }
 
 module "ec2" {
