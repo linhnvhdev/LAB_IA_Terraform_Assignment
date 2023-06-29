@@ -84,7 +84,6 @@ data "aws_iam_policy_document" "force_ssl_only_access" {
 }
 
 data "aws_iam_policy_document" "receive_logs" {
-  # Force SSL access
   statement {
     sid = "S3ServerAccessLogsPolicy"
 

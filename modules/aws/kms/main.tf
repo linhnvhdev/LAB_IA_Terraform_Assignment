@@ -88,3 +88,10 @@ module "sns_encryption_key" {
   aliases = ["alias/sns_encrypt"]
 }
 
+module "ebs_encryption_key" {
+  source = "terraform-aws-modules/kms/aws"
+  description = "key for ebs"
+  enable_key_rotation = true
+  aliases = ["alias/ebs_encrypt"]
+}
+

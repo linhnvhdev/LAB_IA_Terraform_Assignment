@@ -4,23 +4,48 @@ resource "aws_db_subnet_group" "default" {
   count =  1 
 }
 
-resource "aws_db_instance" "main" {
-  allocated_storage    = 20
+# resource "aws_db_instance" "main" {
+#   allocated_storage    = 20
+#   storage_type         = "gp2"
+#   engine               = "mysql"
+#   instance_class       = "db.t2.micro"
+#   db_name                 = var.name
+#   username             = "foo"
+#   password             = "foobarbaz"
+#   skip_final_snapshot = true
+
+#   auto_minor_version_upgrade =  false 
+#   storage_encrypted          =  true 
+#   backup_retention_period    =  7
+#   multi_az =  false 
+#   db_subnet_group_name = aws_db_subnet_group.default[0].name
+#   publicly_accessible = false
+#   count =  1 
+#   iam_database_authentication_enabled = true
+#   deletion_protection = true
+#   performance_insights_enabled = true
+#   performance_insights_kms_key_id = var.kms_key_id
+# }
+
+module "main" {
+  source = "terraform-aws-modules/rds/aws"
+  identifier = var.name
+  allocated_storage = 20
   storage_type         = "gp2"
   engine               = "mysql"
-  instance_class       = "db.t2.micro"
+  family = "mysql5.7"
+  major_engine_version = "5.7"
+  instance_class       = "db.t4.micro"
   db_name                 = var.name
-  username             = "foo"
+  username             = "foo"  
   password             = "foobarbaz"
   skip_final_snapshot = true
-
   auto_minor_version_upgrade =  false 
   storage_encrypted          =  true 
   backup_retention_period    =  7
-  multi_az =  false 
+  multi_az =  false
   db_subnet_group_name = aws_db_subnet_group.default[0].name
   publicly_accessible = false
-  count =  1 
   iam_database_authentication_enabled = true
   deletion_protection = true
   performance_insights_enabled = true

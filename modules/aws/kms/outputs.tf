@@ -22,3 +22,8 @@ output "sns_encryption_key_id" {
   description = "key id of customer managed key to encrypt sns"
   value = module.sns_encryption_key.key_id
 }
+
+output "ebs_encryption_key_arn" {
+  description = "key arn of customer managed key to encrypt ebs"
+  value = module.ebs_encryption_key.key_arn
+}
