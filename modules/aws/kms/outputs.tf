@@ -10,7 +10,7 @@ output "secretsmanager_encryption_key_id" {
 
 output "cloudwatch_encryption_key_id" {
   description = "key id of customer managed key to encrypt cloudwatch"
-  value = module.cloudwatch_encryption_key.key_id   
+  value = module.cloudwatch_encryption_key.key_arn   
 }
 
 output "performance_insights_key_id" {

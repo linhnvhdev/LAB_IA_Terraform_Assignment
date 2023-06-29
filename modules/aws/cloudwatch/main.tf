@@ -1,5 +1,6 @@
-resource "aws_cloudwatch_metric_alarm" "main" {
-
+module "cloudwatch_metric-alarm" {
+  source  = "terraform-aws-modules/cloudwatch/aws//modules/metric-alarm"
+  version = "4.3.0"
   count = 1 
   alarm_name                = var.name
   comparison_operator       = "GreaterThanOrEqualToThreshold"

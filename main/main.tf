@@ -45,6 +45,7 @@ module "iam" {
 
 module "kms" {
   source = "../modules/aws/kms"
+  cloudwatch_name = module.network.cloudwatch_name
 }
 
 module "rds" {
