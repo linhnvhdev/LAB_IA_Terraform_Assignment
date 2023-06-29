@@ -38,6 +38,7 @@ module "elbv2" {
   main_subnet_id = module.network.main_subnet_id
   secondary_subnet_id = module.network.secondary_subnet_id
   vpc_id = module.network.vpc_id
+  logging_bucket = module.s3.elbv2_logging_bucket_id
 }
 
 module "iam" {

@@ -244,6 +244,64 @@ resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_logging
   restrict_public_buckets = true
 }
 
+data "aws_iam_policy_document" "elbv2_receive_logs" {
+  # Force SSL access
+  statement {
+    sid = "S3ServerAccessLogsPolicy"
+
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logging.s3.amazonaws.com"]
+    }
+
+    actions = ["s3:PutObject"]
+
+    resources = [
+      module.elbv2_logging.s3_bucket_arn,
+      "${module.elbv2_logging.s3_bucket_arn}/*"
+    ]
+  }
+}
+
+resource "aws_s3_bucket_policy" "elbv2_receive_logs" {
+  bucket = module.elbv2_logging.s3_bucket_id
+  policy = data.aws_iam_policy_document.elbv2_receive_logs.json
+  count = 1
+}
+
+module "elbv2_logging" {
+  source = "terraform-aws-modules/s3-bucket/aws"
+  version = "3.14.0"
+  bucket = "logging-bucket-elbv2-logging-khanhtq"
+  acl    = "log-delivery-write"
+  force_destroy = true
+
+  control_object_ownership = true
+  object_ownership         = "ObjectWriter"
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm     = "aws:kms"
+        kms_master_key_id = var.s3_kms_key_id
+      }
+    }
+  }
+  versioning = {
+    enabled = true
+  }
+  attach_elb_log_delivery_policy = true
+}
+
+resource "aws_s3_bucket_public_access_block" "bucket_public_access_block_elbv2_logging" {
+  bucket                  = module.elbv2_logging.s3_bucket_id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
 
 
 

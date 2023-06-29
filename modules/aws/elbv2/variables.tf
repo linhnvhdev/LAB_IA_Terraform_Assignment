@@ -20,3 +20,8 @@ variable "secondary_subnet_id" {
   description = "ID of secondary subnet"
   default = "default_secondary_subnet_id"
 }
+
+variable "logging_bucket" {
+  description = "logging bucket"
+  type = string
+}
