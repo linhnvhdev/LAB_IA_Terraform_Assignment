@@ -1,15 +1,14 @@
-resource "aws_iam_group" "inline_group" {
+module "iam_group" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
+  version = "~> 4.0"
   name = "sadcloudInlineGroup"
-
-  count =  1 
+  
 }
 
 resource "aws_iam_group_policy" "inline_group_policy" {
-    group = aws_iam_group.inline_group[0].id
+  group = "sadcloudInlineGroupPolicy"
 
-    count =  1 
-
-    policy = <<EOF
+  policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -18,7 +17,7 @@ resource "aws_iam_group_policy" "inline_group_policy" {
         "ec2:*"
       ],
       "Effect": "Allow",
-      "Resource": "*",
+      "NotResource": "ec2:*",
       "Condition": {
           "Bool": {
               "aws:MultiFactorAuthPresent": ["true"]
@@ -30,59 +29,21 @@ resource "aws_iam_group_policy" "inline_group_policy" {
 EOF
 }
 
-# resource "aws_iam_user" "inline_user" {
-#   name = "sadcloudInlineUser"
+module "iam_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "~> 4.0"
 
-#   count = 1
-# }
+  create_role = true
 
-# resource "aws_iam_user_policy" "inline_user_policy" {
-#   user = aws_iam_user.inline_user[0].name
-
-#   count =  1 
-
-#   policy = <<EOF
-# {
-#   "Version": "2012-10-17",
-#   "Statement": [
-#     {
-#       "NotAction": "s3:DeleteBucket",
-#       "Effect": "Allow",
-#       "Resource": "*"
-#     }
-#   ]
-# }
-# EOF
-# }
-
-resource "aws_iam_role" "inline_role" {
-
-  count =  1 
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
+  role_name             = "inline_role"
+  trusted_role_services = ["ec2.amazonaws.com"]
 }
 
-resource "aws_iam_role_policy" "inline_role_policy" {
-  name = "inline-role-policy"
-  role = aws_iam_role.inline_role[0].id
+module "iam_role_policy" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "~> 4.0"
 
-  count =  1 
-
-
+  name   = "inline-role-policy"
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -102,7 +63,6 @@ EOF
 resource "aws_iam_role" "allow_all_and_no_mfa" {
 
   count =  1 
-
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -125,53 +85,54 @@ resource "aws_iam_role" "allow_all_and_no_mfa" {
 EOF
 }
 
-resource "aws_iam_account_password_policy" "main" {
-  count =  1 
+module "iam_account" {
+    source   =   "terraform-aws-modules/iam/aws//modules/iam-account"
+    version   =   "~>4.0"
 
-  minimum_password_length        =  15
-  require_lowercase_characters   = true
-  require_numbers                = true
-  require_uppercase_characters   = true
-  require_symbols                = true
-  password_reuse_prevention      =  30
-  max_password_age =  0 
+    account_alias = "cloudsec-training-ndt"
+
+    minimum_password_length        =   15
+    require_lowercase_characters   =   true
+    require_numbers                =   true
+    require_uppercase_characters   =   true
+    require_symbols                =   true
+    password_reuse_prevention      =   24
+    max_password_age               =   0 
 }
 
-resource "aws_iam_policy" "policy" {
-  count =  1 
+module "policy" {
+    source   =   "terraform-aws-modules/iam/aws//modules/iam-policy"
+    version   =   "~>4.0"
+    name          =   "wildcard-IAM-policy"
+    path          =   "/"
 
-  name_prefix = "wildcard_IAM_policy"
-  path        = "/"
-
-  policy = <<EOF
+    policy        = <<EOF
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "NotAction": [
-        "ec2:*"
-      ],
-      "Effect": "Allow",
-      "NotResource": [
-        "ec2:*"
-      ]
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Effect":     "Allow",
+            "Resource":[
+                "arn:aws:s3:::khanhtq34-assignment3-terraform-bucket-2"
+            ]
+        }
+    ]
 }
 EOF
 }
 
-resource "aws_iam_group" "admin_not_indicated" {
-  count =  1 
+module "admin_not_indicated"{
+    source     = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
+    version    = "~>4.0"
 
-  name = "sadcloud_superuser"
-  path = "/"
+    name       = "sadcloud_superuser"
 }
 
 resource "aws_iam_policy" "admin_not_indicated_policy"{
   count =  1 
-
-
   name  = "sadcloud_superuser_policy"
 
   policy = <<EOF
@@ -179,12 +140,12 @@ resource "aws_iam_policy" "admin_not_indicated_policy"{
   "Version": "2012-10-17",
   "Statement": [
     {
-      "NotAction": [
-        "ec2:*"
+      "Action": [
+        "s3:GetBucketLocation"
       ],
       "Effect": "Allow",
-      "NotResource": [
-        "ec2:*"
+      "Resource": [
+        "arn:aws:s3:::khanhtq34-assignment3-terraform-bucket-2"
       ],
       "Condition": {
           "Bool": {
@@ -195,10 +156,4 @@ resource "aws_iam_policy" "admin_not_indicated_policy"{
   ]
 }
 EOF
-}
-
-resource "aws_iam_group_policy_attachment" "admin_not_indicated_policy-attach" {
-  group = aws_iam_group.admin_not_indicated[0].id
-  policy_arn = aws_iam_policy.admin_not_indicated_policy[0].arn
-  count =  1 
 }
