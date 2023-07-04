@@ -6,7 +6,7 @@ output "vpc_id" {
 
 output "vpc_cidr" {
   description = "CIDR of created VPC"
-  value       = length(module.aws_vpc_main[0].vpc_id) > 0 ? module.aws_vpc_main[0].vpc_ipv6_cidr_block : null
+  value       = length(module.aws_vpc_main[0].vpc_id) > 0 ? module.aws_vpc_main[0].vpc_cidr_block : null
 }
 
 output "main_subnet_id" {
@@ -26,7 +26,7 @@ output "subnet_cidr" {
 
 output "vpc_cidr_v6" {
   description = "CIDR v6 of created VPC"
-  value = length(module.aws_vpc_main) > 0 ? module.aws_vpc_main[0].vpc_cidr_v6 : null
+  value = length(module.aws_vpc_main) > 0 ? module.aws_vpc_main[0].vpc_ipv6_cidr_block : null
 }
 
 output "cloudwatch_name" {
